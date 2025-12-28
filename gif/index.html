@@ -1,462 +1,401 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" href="favicon.ico">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GIF Creator and Extractor</title>
-    <style>
-        :root {
-            --bg-primary: #1a1a1a;
-            --bg-secondary: #2a2a2a;
-            --border: #3a3a3a;
-            --text-primary: #f0f0f0;
-            --text-secondary: #b0b0b0;
-            --accent: #4a8eff;
-            --accent-hover: #5a9eff;
-            --warning: #ffa54a;
-            --progress-bg: #3a3a3a;
-            --progress-fill: #4a8eff;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GIF Creator and Extractor</title>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<style>
+:root{
+  --bg:#111;
+  --panel:#1e1e1e;
+  --border:#333;
+  --text:#f0f0f0;
+  --muted:#aaa;
+  --accent:#4a8eff;
+  --accent-hover:#6aa2ff;
+  --warn:#ffa54a;
+}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            padding: 24px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
+*{box-sizing:border-box}
 
-        header {
-            margin-bottom: 40px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-        }
+body{
+  margin:0;
+  padding:24px;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+  background:var(--bg);
+  color:var(--text);
+  max-width:900px;
+  margin:auto;
+}
 
-        h1 {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
+header{
+  border-bottom:1px solid var(--border);
+  padding-bottom:16px;
+  margin-bottom:32px;
+}
 
-        .subtitle {
-            color: var(--text-secondary);
-            font-size: 16px;
-        }
+section{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:24px;
+  margin-bottom:32px;
+}
 
-        section {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 24px;
-            margin-bottom: 32px;
-        }
+h1{margin:0 0 6px}
+.subtitle{color:var(--muted)}
 
-        h2 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: var(--text-primary);
-        }
+button{
+  width:100%;
+  padding:14px;
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-weight:600;
+  font-size:16px;
+  cursor:pointer;
+}
+button:hover{background:var(--accent-hover)}
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+.back-btn{
+  margin-top:16px;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--muted);
+}
+.back-btn:hover{
+  background:var(--bg);
+  color:var(--text);
+  border-color:var(--accent);
+}
 
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
+/* DROP ZONE */
+#dropZone{
+  margin-top:16px;
+  border:2px dashed var(--border);
+  border-radius:12px;
+  padding:40px 20px;
+  text-align:center;
+  color:var(--muted);
+  cursor:pointer;
+  transition:.2s;
+}
+#dropZone.drag{
+  border-color:var(--accent);
+  color:var(--accent);
+  background:#0a1a33;
+}
 
-        input[type="file"] {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            color: var(--text-primary);
-            cursor: pointer;
-        }
+/* PREVIEW GRID */
+#preview{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,80px);
+  gap:10px;
+  margin-top:16px;
+}
+.frame{
+  width:80px;
+  height:80px;
+  background:#000;
+  border:1px solid var(--border);
+  border-radius:6px;
+  overflow:hidden;
+  cursor:grab;
+}
+.frame.dragging{opacity:.4}
+.frame img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
 
-        input[type="file"]:hover {
-            border-color: var(--accent);
-        }
+label{display:block;margin-top:16px;color:var(--muted)}
+input,select{
+  width:100%;
+  padding:10px;
+  background:#000;
+  border:1px solid var(--border);
+  border-radius:6px;
+  color:var(--text);
+}
 
-        input[type="number"],
-        select {
-            width: 100%;
-            padding: 10px;
-            background-color: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            color: var(--text-primary);
-        }
+.form-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:16px;
+}
 
-        input[type="number"]:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .note {
-            font-size: 14px;
-            color: var(--warning);
-            margin-top: 8px;
-            margin-bottom: 16px;
-        }
-
-        button {
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            width: 100%;
-        }
-
-        button:hover {
-            background-color: var(--accent-hover);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .progress-container {
-            margin-top: 20px;
-        }
-
-        progress {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        progress::-webkit-progress-bar {
-            background-color: var(--progress-bg);
-            border-radius: 3px;
-        }
-
-        progress::-webkit-progress-value {
-            background-color: var(--progress-fill);
-            border-radius: 3px;
-        }
-
-        progress::-moz-progress-bar {
-            background-color: var(--progress-fill);
-            border-radius: 3px;
-        }
-
-        .progress-text {
-            text-align: center;
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-top: 8px;
-        }
-
-        @media (min-width: 600px) {
-            .form-row {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 20px;
-            }
-        }
-    </style>
+progress{
+  width:100%;
+  height:8px;
+  margin-top:12px;
+}
+.note{font-size:14px;color:var(--warn);margin-top:6px}
+</style>
 </head>
+
 <body>
-    <header>
-        <h1>GIF Creator and Extractor</h1>
-        <p class="subtitle">Convert images to GIF and extract frames from GIF files</p>
-        <button id="backButton" style="margin-top: 20px; background-color: transparent; border: 1px solid var(--border); color: var(--text-secondary);" onclick="location.href='/'">Back to Home</button>
-    </header>
 
-    <section id="creator-section">
-        <h2>Create GIF from Images</h2>
-        
-        <div class="form-group">
-            <label for="imageInput">Select Image Files</label>
-            <input type="file" id="imageInput" multiple accept="image/jpeg,image/png,image/gif,image/webp">
-            <p class="note">Maximum 500 images. Some formats may be skipped due to browser limitations.</p>
-        </div>
+<header>
+  <h1>GIF Creator and Extractor</h1>
+  <div class="subtitle">Create GIFs or extract frames</div>
+  <button class="back-btn" onclick="location.href='/'">← Back to Home</button>
+</header>
 
-        <div class="form-row">
-            <div class="form-group">
-                <label for="frameDelay">Frame Delay (ms)</label>
-                <input type="number" id="frameDelay" value="100" min="20" max="5000">
-            </div>
+<section>
+<h2>Create GIF</h2>
 
-            <div class="form-group">
-                <label for="loopCount">Loop Count</label>
-                <select id="loopCount">
-                    <option value="0">Infinite</option>
-                    <option value="1">Once</option>
-                    <option value="2">Twice</option>
-                    <option value="3">Three times</option>
-                </select>
-            </div>
+<!-- DROP ZONE -->
+<div id="dropZone">
+  <strong>Click to upload</strong> or drag in your files<br>
+  <span style="font-size:14px">Up to 500 images</span>
+</div>
 
-            <div class="form-group">
-                <label for="scaleFactor">Scale Factor</label>
-                <input type="number" id="scaleFactor" value="1" step="0.1" min="0.1" max="5">
-            </div>
-        </div>
+<input type="file" id="fileInput" multiple accept="image/*" hidden>
 
-        <button id="createGifBtn">Create GIF</button>
-        
-        <div class="progress-container" style="display: none;" id="creatorProgress">
-            <progress id="gifProgress" value="0" max="100"></progress>
-            <div class="progress-text" id="gifProgressText">Processing...</div>
-        </div>
-    </section>
+<div id="preview"></div>
 
-    <section id="extractor-section">
-        <h2>Extract Frames from GIF</h2>
-        
-        <div class="form-group">
-            <label for="gifInput">Select GIF File</label>
-            <input type="file" id="gifInput" accept="image/gif">
-        </div>
+<div class="form-row">
+  <div>
+    <label>Frame Delay (ms)</label>
+    <input type="number" id="delay" value="100" min="20">
+  </div>
+  <div>
+    <label>Loop</label>
+    <select id="loop">
+      <option value="0">Infinite</option>
+      <option value="1">Once</option>
+      <option value="2">Twice</option>
+    </select>
+  </div>
+  <div>
+    <label>Scale</label>
+    <input type="number" id="scale" value="1" step="0.1" min="0.1">
+  </div>
+</div>
 
-        <button id="extractGifBtn">Extract Frames and Download ZIP</button>
-        
-        <div class="progress-container" style="display: none;" id="extractorProgress">
-            <progress id="zipProgress" value="0" max="100"></progress>
-            <div class="progress-text" id="zipProgressText">Processing...</div>
-        </div>
-    </section>
+<button id="makeGif">Create GIF</button>
+<progress id="gifProgress" value="0" max="100" style="display:none"></progress>
+</section>
 
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
-    <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+<section>
+<h2>Extract GIF Frames</h2>
+<input type="file" id="gifInput" accept="image/gif">
+<button id="extractGif">Extract & Download ZIP</button>
+<progress id="zipProgress" value="0" max="100" style="display:none"></progress>
+</section>
 
-    <script>
-        const { createFFmpeg, fetchFile } = FFmpeg;
-        const ffmpeg = createFFmpeg({ log: false });
-        let isFFmpegLoaded = false;
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
+<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 
-        // DOM Elements
-        const elements = {
-            imageInput: document.getElementById('imageInput'),
-            gifInput: document.getElementById('gifInput'),
-            frameDelay: document.getElementById('frameDelay'),
-            loopCount: document.getElementById('loopCount'),
-            scaleFactor: document.getElementById('scaleFactor'),
-            createGifBtn: document.getElementById('createGifBtn'),
-            extractGifBtn: document.getElementById('extractGifBtn'),
-            creatorProgress: document.getElementById('creatorProgress'),
-            extractorProgress: document.getElementById('extractorProgress'),
-            gifProgress: document.getElementById('gifProgress'),
-            zipProgress: document.getElementById('zipProgress'),
-            gifProgressText: document.getElementById('gifProgressText'),
-            zipProgressText: document.getElementById('zipProgressText')
-        };
+<script>
+const { createFFmpeg, fetchFile } = FFmpeg;
+const ffmpeg = createFFmpeg({ log:false });
+let loaded=false;
+let images=[];
 
-        async function loadFFmpeg() {
-            if (!isFFmpegLoaded) {
-                try {
-                    elements.createGifBtn.disabled = true;
-                    elements.extractGifBtn.disabled = true;
-                    elements.createGifBtn.textContent = 'Loading FFmpeg...';
-                    
-                    await ffmpeg.load();
-                    isFFmpegLoaded = true;
-                    
-                    elements.createGifBtn.disabled = false;
-                    elements.extractGifBtn.disabled = false;
-                    elements.createGifBtn.textContent = 'Create GIF';
-                } catch (error) {
-                    console.error('Failed to load FFmpeg:', error);
-                    alert('Failed to load FFmpeg. Please refresh the page and try again.');
-                }
-            }
-        }
+const $=id=>document.getElementById(id);
 
-        async function createGif() {
-            const files = Array.from(elements.imageInput.files).slice(0, 500);
-            if (files.length === 0) {
-                alert('Please select at least one image file.');
-                return;
-            }
+/* LOAD FFMPEG */
+async function loadFF(){
+  if(!loaded){
+    $('makeGif').disabled = true;
+    $('extractGif').disabled = true;
+    $('makeGif').textContent = 'Loading FFmpeg...';
+    $('extractGif').textContent = 'Loading FFmpeg...';
+    
+    try {
+      await ffmpeg.load();
+      loaded=true;
+      console.log('FFmpeg loaded successfully');
+      
+      $('makeGif').disabled = false;
+      $('extractGif').disabled = false;
+      $('makeGif').textContent = 'Create GIF';
+      $('extractGif').textContent = 'Extract & Download ZIP';
+    } catch (error) {
+      console.error('Failed to load FFmpeg:', error);
+      alert('Failed to load FFmpeg. Please refresh the page and try again.');
+      $('makeGif').textContent = 'Create GIF';
+      $('extractGif').textContent = 'Extract & Download ZIP';
+    }
+  }
+}
 
-            await loadFFmpeg();
-            
-            elements.createGifBtn.disabled = true;
-            elements.creatorProgress.style.display = 'block';
-            elements.gifProgress.value = 0;
-            elements.gifProgressText.textContent = 'Initializing...';
+/* DROP ZONE LOGIC */
+const dropZone=$('dropZone');
+const fileInput=$('fileInput');
 
-            try {
-                // Create input directory
-                ffmpeg.FS('mkdir', '/input');
+dropZone.onclick=()=>fileInput.click();
 
-                // Write files to virtual filesystem
-                for (let i = 0; i < files.length; i++) {
-                    try {
-                        const file = files[i];
-                        const data = await fetchFile(file);
-                        ffmpeg.FS('writeFile', `/input/${i}.png`, data);
-                        
-                        // Update progress
-                        const progress = Math.round((i / files.length) * 50);
-                        elements.gifProgress.value = progress;
-                        elements.gifProgressText.textContent = `Processing images: ${i + 1}/${files.length}`;
-                    } catch (error) {
-                        console.warn(`Skipped file ${files[i].name}:`, error);
-                    }
-                }
+dropZone.ondragover=e=>{
+  e.preventDefault();
+  dropZone.classList.add('drag');
+};
+dropZone.ondragleave=()=>dropZone.classList.remove('drag');
+dropZone.ondrop=e=>{
+  e.preventDefault();
+  dropZone.classList.remove('drag');
+  handleFiles(e.dataTransfer.files);
+};
 
-                const delay = elements.frameDelay.value;
-                const loop = elements.loopCount.value;
-                const scale = elements.scaleFactor.value;
+fileInput.onchange=()=>handleFiles(fileInput.files);
 
-                elements.gifProgressText.textContent = 'Creating GIF...';
-                elements.gifProgress.value = 50;
+function handleFiles(files){
+  images=[...files].slice(0,500);
+  renderPreview();
+}
 
-                // Run FFmpeg command
-                await ffmpeg.run(
-                    '-framerate', String(1000 / delay),
-                    '-i', '/input/%d.png',
-                    '-vf', `scale=iw*${scale}:ih*${scale}:flags=lanczos`,
-                    '-loop', loop,
-                    '-f', 'gif',
-                    'output.gif'
-                );
+/* PREVIEW + DRAG REORDER */
+function renderPreview(){
+  const box=$('preview');
+  box.innerHTML='';
+  images.forEach((file,i)=>{
+    const d=document.createElement('div');
+    d.className='frame';
+    d.draggable=true;
 
-                elements.gifProgress.value = 90;
-                elements.gifProgressText.textContent = 'Finalizing...';
+    const img=document.createElement('img');
+    img.src=URL.createObjectURL(file);
+    d.appendChild(img);
+    box.appendChild(d);
 
-                // Read and download the result
-                const data = ffmpeg.FS('readFile', 'output.gif');
-                const blob = new Blob([data.buffer], { type: 'image/gif' });
-                downloadFile(blob, 'created.gif');
+    d.ondragstart=e=>{
+      d.classList.add('dragging');
+      e.dataTransfer.setData('i',i);
+    };
+    d.ondragend=()=>d.classList.remove('dragging');
+    d.ondragover=e=>e.preventDefault();
+    d.ondrop=e=>{
+      e.preventDefault();
+      const from=+e.dataTransfer.getData('i');
+      images.splice(i,0,images.splice(from,1)[0]);
+      renderPreview();
+    };
+  });
+}
 
-                elements.gifProgress.value = 100;
-                elements.gifProgressText.textContent = 'Complete!';
+/* CREATE GIF */
+$('makeGif').onclick=async()=>{
+  console.log('Create GIF button clicked');
+  
+  if(!images.length){
+    alert('Please select images first');
+    return;
+  }
+  
+  await loadFF();
+  if(!loaded) return;
 
-            } catch (error) {
-                console.error('Error creating GIF:', error);
-                alert('Failed to create GIF. Please check the console for details.');
-            } finally {
-                elements.createGifBtn.disabled = false;
-                setTimeout(() => {
-                    elements.creatorProgress.style.display = 'none';
-                }, 2000);
-            }
-        }
+  $('gifProgress').style.display='block';
+  $('gifProgress').value=0;
+  $('makeGif').disabled = true;
+  $('makeGif').textContent = 'Creating GIF...';
 
-        async function extractGif() {
-            const file = elements.gifInput.files[0];
-            if (!file) {
-                alert('Please select a GIF file.');
-                return;
-            }
+  try{
+    try{ffmpeg.FS('mkdir','/in')}catch{}
+    ffmpeg.FS('readdir','/in').forEach(f=>ffmpeg.FS('unlink','/in/'+f));
 
-            await loadFFmpeg();
-            
-            elements.extractGifBtn.disabled = true;
-            elements.extractorProgress.style.display = 'block';
-            elements.zipProgress.value = 0;
-            elements.zipProgressText.textContent = 'Initializing...';
+    for(let i=0;i<images.length;i++){
+      ffmpeg.FS('writeFile',`/in/${i}.png`,await fetchFile(images[i]));
+      $('gifProgress').value=(i/images.length)*50;
+    }
 
-            try {
-                // Write GIF to virtual filesystem
-                const data = await fetchFile(file);
-                ffmpeg.FS('writeFile', 'input.gif', data);
+    await ffmpeg.run(
+      '-framerate',String(1000/+$('delay').value),
+      '-i','/in/%d.png',
+      '-vf',`scale=iw*${$('scale').value}:ih*${$('scale').value}`,
+      '-loop',$('loop').value,
+      'out.gif'
+    );
 
-                elements.zipProgressText.textContent = 'Extracting frames...';
-                elements.zipProgress.value = 30;
+    const data=ffmpeg.FS('readFile','out.gif');
+    download(new Blob([data.buffer],{type:'image/gif'}),'created.gif');
+    $('gifProgress').value=100;
+  }catch(e){
+    console.error(e);
+    alert('Failed to create GIF: ' + e.message);
+  } finally {
+    $('makeGif').disabled = false;
+    $('makeGif').textContent = 'Create GIF';
+    setTimeout(() => {
+      $('gifProgress').style.display = 'none';
+      $('gifProgress').value = 0;
+    }, 2000);
+  }
+};
 
-                // Extract frames
-                await ffmpeg.run(
-                    '-i', 'input.gif',
-                    'frame_%04d.png'
-                );
+/* EXTRACT GIF */
+$('extractGif').onclick=async()=>{
+  console.log('Extract GIF button clicked');
+  
+  const f=$('gifInput').files[0];
+  if(!f){
+    alert('Please select a GIF file');
+    return;
+  }
+  
+  await loadFF();
+  if(!loaded) return;
 
-                elements.zipProgressText.textContent = 'Creating ZIP file...';
-                elements.zipProgress.value = 60;
+  $('zipProgress').style.display='block';
+  $('extractGif').disabled = true;
+  $('extractGif').textContent = 'Extracting...';
 
-                // Create ZIP file
-                const zip = new JSZip();
-                const files = ffmpeg.FS('readdir', '/').filter(f => f.startsWith('frame_'));
+  try {
+    ffmpeg.FS('writeFile','in.gif',await fetchFile(f));
+    await ffmpeg.run('-i','in.gif','frame_%04d.png');
 
-                for (let i = 0; i < files.length; i++) {
-                    const filename = files[i];
-                    const frameData = ffmpeg.FS('readFile', filename);
-                    zip.file(filename, frameData);
-                    
-                    const progress = 60 + Math.round((i / files.length) * 35);
-                    elements.zipProgress.value = progress;
-                    elements.zipProgressText.textContent = `Adding frames to ZIP: ${i + 1}/${files.length}`;
-                }
+    const zip=new JSZip();
+    const frames = ffmpeg.FS('readdir','/').filter(f=>f.startsWith('frame_'));
+    
+    for(let i=0; i<frames.length; i++){
+      zip.file(frames[i],ffmpeg.FS('readFile',frames[i]));
+      $('zipProgress').value = ((i+1) / frames.length) * 100;
+    }
 
-                elements.zipProgressText.textContent = 'Generating download...';
-                elements.zipProgress.value = 95;
+    download(await zip.generateAsync({type:'blob'}),'frames.zip');
+    $('zipProgress').value=100;
+  } catch(e) {
+    console.error(e);
+    alert('Failed to extract GIF: ' + e.message);
+  } finally {
+    $('extractGif').disabled = false;
+    $('extractGif').textContent = 'Extract & Download ZIP';
+    setTimeout(() => {
+      $('zipProgress').style.display = 'none';
+      $('zipProgress').value = 0;
+    }, 2000);
+  }
+};
 
-                const zipBlob = await zip.generateAsync({ type: 'blob' });
-                downloadFile(zipBlob, 'gif_frames.zip');
+/* SAFE DOWNLOAD */
+function download(blob,name){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=name;
+  document.body.appendChild(a);
+  setTimeout(()=>{
+    a.click();
+    setTimeout(()=>{
+      URL.revokeObjectURL(url);
+      a.remove();
+    },1000);
+  },50);
+}
 
-                elements.zipProgress.value = 100;
-                elements.zipProgressText.textContent = 'Complete!';
+// Preload FFmpeg on first user interaction
+document.addEventListener('click', () => {
+  if(!loaded && images.length > 0){
+    loadFF();
+  }
+}, { once: true });
 
-            } catch (error) {
-                console.error('Error extracting GIF:', error);
-                alert('Failed to extract GIF frames. Please check the console for details.');
-            } finally {
-                elements.extractGifBtn.disabled = false;
-                setTimeout(() => {
-                    elements.extractorProgress.style.display = 'none';
-                }, 2000);
-            }
-        }
+console.log('Script loaded successfully');
+</script>
 
-        function downloadFile(blob, filename) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        // Event Listeners
-        elements.createGifBtn.addEventListener('click', createGif);
-        elements.extractGifBtn.addEventListener('click', extractGif);
-
-        // Preload FFmpeg when user interacts with the page
-        document.addEventListener('click', () => {
-            if (!isFFmpegLoaded) {
-                loadFFmpeg();
-            }
-        }, { once: true });
-
-        // Back button
-        const backButton = document.getElementById('backButton');
-        backButton.addEventListener('mouseenter', () => {
-            backButton.style.backgroundColor = 'var(--bg-primary)';
-            backButton.style.color = 'var(--text-primary)';
-        });
-        
-        backButton.addEventListener('mouseleave', () => {
-            backButton.style.backgroundColor = 'transparent';
-            backButton.style.color = 'var(--text-secondary)';
-        });
-    </script>
 </body>
 </html>
